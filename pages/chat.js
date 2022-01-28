@@ -1,10 +1,29 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+import { createClient } from '@supabase/supabase-js'
+import react from 'react';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyMTA3NiwiZXhwIjoxOTU4ODk3MDc2fQ.KlaFuCO7PUpsO4gU0VkgtVj__0VnSkSlsosSRj7_cOo'
+const SUPABASE_URL = 'https://bardwfabtxebujcmjhin.supabase.co';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
 
 export default function ChatPage() {
     const [mensagem, setMensagem] = React.useState('');
     const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+
+    React.useEffect(() => {
+        supabaseClient
+            .from('mensagens')
+            .select('*')
+            .order('id, {ascending: false}')
+            .then(({data}) => {
+                console.log('Dados da consulta', data);
+                setListaDeMensagens(data);
+            });
+    }, [listaDeMensagens]);
 
     /*
     // Usuário
@@ -19,10 +38,24 @@ export default function ChatPage() {
     */
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
-            id: listaDeMensagens.length + 1,
+            //id: listaDeMensagens.length + 1,
             de: 'vanessametonini',
             texto: novaMensagem,
         };
+
+        supabaseClient
+            .from('mensagens')
+            .insert([
+                //Tem que ser um objeto com com MESMOS CAMPOS que você escreveu no supabase
+                mensagem
+            ])
+            .then(() => {
+                console.log('Criando mensagem: ', o  )
+                setListaDeMensagens([
+                    data[0],
+                    ...listaDeMensagens,
+                ]);
+            });
 
         setListaDeMensagens([
             mensagem,
@@ -170,11 +203,11 @@ function MessageList(props) {
                                 styleSheet={{
                                     width: '20px',
                                     height: '20px',
-                                    borderRadius: '50%',
+                                    borderRadius: '50%', 
                                     display: 'inline-block',
                                     marginRight: '8px',
                                 }}
-                                src={`https://github.com/vanessametonini.png`}
+                                src={`https://github.com/${mensagem.de}.png`}
                             />
                             <Text tag="strong">
                                 {mensagem.de}
